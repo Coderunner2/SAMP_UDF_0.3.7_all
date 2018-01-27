@@ -158,7 +158,6 @@ global pParam3                              := 0x0
 global pParam4                              := 0x0
 global pParam5                              := 0x0
 global pInjectFunc                          := 0x0
-global sampVersion                          := 0
 global nZone                                := 1
 global nCity                                := 1
 global bInitZaC                             := 0
@@ -3500,9 +3499,6 @@ checkHandles() {
     if (!refreshGTA() || !refreshSAMP() || !refreshMemory())
         return false
 
-    if (!sampVersion)
-        sampVersion := readMem(hGTA, dwSAMP + 0x1036, 1, "UChar") == 0xD8 ? 1 : 2
-
     iRefreshHandles := A_TickCount
     return true
 }
@@ -3548,7 +3544,8 @@ refreshSAMP() {
     dwSAMP := getModuleBaseAddress("samp.dll", hGTA)
     if(!dwSAMP)
         return false
-    
+
+    global sampVersion := readMem(hGTA, dwSAMP + 0x1036, 1, "UChar") == 0xD8 ? 1 : 2
     return true
 }
 
