@@ -71,9 +71,13 @@ global ADDR_SAMP_SERVERIP                   := [0x20, 0x1C, 0x30]
 global ADDR_SAMP_SERVERPORT                 := [0x225, 0x221, 0x235]
 global ADDR_SAMP_VEHPOOL                    := [0x1C, 0xC, 0xC]
 
-global SAMP_REMOTEPLAYERDATA_OFFSET         := [0x0, 0xC, 0xC]
-global SAMP_REMOTEPLAYERDATA_ACTOR          := [0x0, 0x1C, 0x1C]
-global SAMP_REMOTEPLAYERDATA_PED            := [0x2A4, 0x248, 0x248]
+global SAMP_REMOTEPLAYERDATA_OFFSET         := [0x0, 0xC, 0x8]
+global SAMP_REMOTEPLAYERDATA_ACTOR          := [0x0, 0x1C, 0x4]
+global SAMP_REMOTEPLAYERDATA_PED            := [0x25C, 0x40, 0x40]
+global SAMP_REMOTEPLAYERDATA_HEALTH			:= [0x1BC, 0x1BC, 0x1B0]
+global SAMP_REMOTEPLAYERDATA_ARMOR			:= [0x1B8, 0x1AC, 0x1AC]
+global SAMP_REMOTEPLAYERDATA_GLOBALPOS      := [0x2A4, 0x17C, 0x120]
+global SAMP_REMOTEPLAYERDATA_POS            := [0x2A4, 0x2A, 0x42]
 global FUNC_SAMP_SETCHECKPOINT              := [0x9D340, 0x9D3F0, 0xA1C00]
 global SAMP_CHECKPOINT_ACTIVE               := [0x24, 0x4D, 0x4D]
 
@@ -131,9 +135,9 @@ global SAMP_PREMOTEPLAYER_OFFSET            := [0x2E, 0x26, 0x26]
 global SAMP_ISTRLENNAME___OFFSET            := [0x1C, 0x24, 0x24]
 global SAMP_SZPLAYERNAME_OFFSET             := [0xC, 0x14, 0x14]
 global SAMP_PSZPLAYERNAME_OFFSET            := [0xC, 0x14, 0x14]
-global SAMP_IPING_OFFSET                    := [0x28, 0x4, 0x4]
+global SAMP_IPING_OFFSET                    := [0x28, 0x4, 0xC]
 global SAMP_ISCORE_OFFSET                   := [0x24, 0x0, 0x0]
-global SAMP_ISNPC_OFFSET                    := [0x4, 0x8, 0x8]
+global SAMP_ISNPC_OFFSET                    := [0x4, 0x8, 0x4]
 
 global SAMP_PLAYER_MAX                      := 1004
 
@@ -2777,24 +2781,24 @@ UpdateOScoreboardData() {
         if(dwRemoteplayerData==0)		;this ever happen?
             continue
 		
-		dwAddress := readDWORD(hGTA, dwRemoteplayerData + 0x1E9)        ;iGlobalMarkerLoaded
+		dwAddress := readFloat(hGTA, dwRemoteplayerData + SAMP_REMOTEPLAYERDATA_GLOBALPOS[sampVersion])        ;iGlobalMarkerLoaded
         if(ErrorLevel) {
             ErrorLevel := ERROR_READ_MEMORY
             return 0
         }
 		if(dwAddress)
 		{
-			ix := readMem(hGTA, dwRemoteplayerData + 0x1E9, 4, "Int")        ;x map
+			ix := readMem(hGTA, dwRemoteplayerData + SAMP_REMOTEPLAYERDATA_GLOBALPOS[sampVersion], 4, "Float")        ;x map
 			if(ErrorLevel) {
 				ErrorLevel := ERROR_READ_MEMORY
 				return 0
 			}
-			iy := readMem(hGTA, dwRemoteplayerData + 0x1ED, 4, "Int")        ;y map
+			iy := readMem(hGTA, dwRemoteplayerData + SAMP_REMOTEPLAYERDATA_GLOBALPOS[sampVersion] + 0x4, 4, "Float")        ;y map
 			if(ErrorLevel) {
 				ErrorLevel := ERROR_READ_MEMORY
 				return 0
 			}
-			iz := readMem(hGTA, dwRemoteplayerData + 0x1F1, 4, "Int")        ;z map
+			iz := readMem(hGTA, dwRemoteplayerData + SAMP_REMOTEPLAYERDATA_GLOBALPOS[sampVersion] + 0x8, 4, "Float")        ;z map
 			if(ErrorLevel) {
 				ErrorLevel := ERROR_READ_MEMORY
 				return 0
@@ -2810,21 +2814,21 @@ UpdateOScoreboardData() {
         if(dwpSAMP_Actor==0)               ;not streamed in
             continue
 
-        dwPed := readDWORD(hGTA, dwRemoteplayerData + SAMP_REMOTEPLAYERDATA_PED[sampVersion])              ;pGTA_Ped_
+        dwPed := readDWORD(hGTA, dwpSAMP_Actor + SAMP_REMOTEPLAYERDATA_PED[sampVersion])              ;pGTA_Ped_
         if(ErrorLevel) {
             ErrorLevel := ERROR_READ_MEMORY
             return 0
         }
         if(dwPed==0)
             continue
+
         o.PED := dwPed
-		
-		fHP := readFloat(hGTA, dwRemoteplayerData + 444)
+		fHP := readFloat(hGTA, dwRemoteplayerData + SAMP_REMOTEPLAYERDATA_HEALTH[sampVersion])
 		if(ErrorLevel) {
             ErrorLevel := ERROR_READ_MEMORY
             return 0
         }
-		fARMOR := readFloat(hGTA, dwRemoteplayerData + 440)
+		fARMOR := readFloat(hGTA, dwRemoteplayerData + SAMP_REMOTEPLAYERDATA_ARMOR[sampVersion])
 
 		if(ErrorLevel) {
             ErrorLevel := ERROR_READ_MEMORY
